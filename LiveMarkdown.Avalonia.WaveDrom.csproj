@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>LiveMarkdown.Avalonia</RootNamespace>
+    <TargetFramework>net10.0</TargetFramework>
+    <Title>LiveMarkdown.Avalonia.WaveDrom</Title>
+    <Authors>DearVa</Authors>
+    <Description>This is a extension package for LiveMarkdown.Avalonia that adds support for rendering WaveDrom timing diagrams.</Description>
+    <PackageProjectUrl>https://github.com/DearVa/LiveMarkdown.Avalonia</PackageProjectUrl>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/DearVa/LiveMarkdown.Avalonia</RepositoryUrl>
+    <PackageTags>markdown;avalonia;llm;wavedrom;timing-diagram</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DocumentationFile>bin\Release\LiveMarkdown.Avalonia.WaveDrom.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LiveMarkdown.Avalonia\LiveMarkdown.Avalonia.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\"/>
+    <None Include="..\..\img\icon.png" Pack="true" PackagePath="icon.png"/>
+  </ItemGroup>
+</Project>
