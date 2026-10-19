@@ -11,6 +11,9 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/DearVa/LiveMarkdown.Avalonia</RepositoryUrl>
     <PackageTags>markdown;avalonia;llm;wavedrom;timing-diagram</PackageTags>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -18,7 +21,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LiveMarkdown.Avalonia\LiveMarkdown.Avalonia.csproj"/>
+    <PackageReference Include="Avalonia" Version="12.1.3" />
+    <PackageReference Include="LiveMarkdown.Avalonia" Version="2.4.3" />
   </ItemGroup>
 
   <ItemGroup>
