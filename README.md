@@ -194,24 +194,22 @@ Pushing a tag like `v0.1.0` triggers the
 
 > **Trusted Publishing setup**
 >
-> No `NUGET_API_KEY` secret is required. Instead, configure a trusted publishing
-> policy on nuget.org and expose your nuget.org profile name as the repository
-> variable `NUGET_USER`:
+> No long-lived `NUGET_API_KEY` is required. Instead, configure a trusted
+> publishing policy on nuget.org and expose your nuget.org profile name as
+> `NUGET_USER`:
 >
 > 1. On nuget.org, go to **Account settings → Trusted Publishing** and add a
 >    policy for this repository (owner/repo) and the workflow file
 >    `.github/workflows/release.yml`.
-> 2. In GitHub, add a repository (or environment) **variable** named
->    `NUGET_USER` set to your nuget.org profile name.
->
-> The nuget.org profile name is resolved in this order:
->
-> 1. the `nuget_user` input of a manual `workflow_dispatch` run (if provided),
-> 2. the `NUGET_USER` repository variable,
-> 3. the repository owner (with a warning), as a fallback.
+> 2. In GitHub, add `NUGET_USER` under
+>    **Settings → Secrets and variables → Actions**, set to your nuget.org
+>    profile name. It may be added on either the **Variables** tab
+>    (`vars.NUGET_USER`) or the **Secrets** tab (`secrets.NUGET_USER`) — the
+>    workflow reads whichever is present (variable takes precedence).
 >
 > The publish step only runs for tag pushes (`v*`) or a manual dispatch with an
-> explicit version; `0.0.0-dev.*` builds are never pushed.
+> explicit version; `0.0.0-dev.*` builds are never pushed. If `NUGET_USER` is
+> missing, the workflow fails early with a clear message.
 
 ```bash
 git tag v0.1.0
