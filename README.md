@@ -187,8 +187,25 @@ Pushing a tag like `v0.1.0` triggers the
 
 1. restores, builds and packs the project in `Release` configuration,
 2. uploads the generated `.nupkg` as a workflow artifact,
-3. publishes the package to NuGet.org (only if the `NUGET_API_KEY` secret is set),
+3. publishes the package to NuGet.org using
+   [NuGet Trusted Publishing](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing)
+   (an OIDC-exchanged, short-lived API key — no long-lived secret is stored),
 4. creates a GitHub Release with the `.nupkg` attached and auto-generated notes.
+
+> **Trusted Publishing setup**
+>
+> No `NUGET_API_KEY` secret is required. Instead, configure a trusted publishing
+> policy on nuget.org and expose your nuget.org profile name as the repository
+> variable `NUGET_USER`:
+>
+> 1. On nuget.org, go to **Account settings → Trusted Publishing** and add a
+>    policy for this repository (owner/repo) and the workflow file
+>    `.github/workflows/release.yml`.
+> 2. In GitHub, add a repository (or environment) **variable** named
+>    `NUGET_USER` set to your nuget.org profile name.
+>
+> The publish step only runs for tag pushes (`v*`) or a manual dispatch with an
+> explicit version; `0.0.0-dev.*` builds are never pushed.
 
 ```bash
 git tag v0.1.0
