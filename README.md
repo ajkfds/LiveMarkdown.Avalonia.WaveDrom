@@ -1,5 +1,7 @@
 # LiveMarkdown.Avalonia.WaveDrom
 
+![demo](./demo.png)
+
 An extension package for `LiveMarkdown.Avalonia` that natively renders
 [WaveDrom](https://wavedrom.com/) timing diagrams (digital waveform diagrams),
 written in Markdown code fences, as Avalonia controls **without a JavaScript
@@ -7,8 +9,6 @@ runtime or WebView**.
 
 The official WaveDrom rendering logic (layout, brick skins, markers, arrows,
 etc.) has been ported to C# and is drawn directly via `DrawingContext`.
-
-![demo](./demo.png)
 
 ## Features
 
