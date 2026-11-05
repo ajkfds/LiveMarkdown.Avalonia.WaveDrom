@@ -67,13 +67,27 @@ jobs:
 
       # Publish only for real releases (a tag push, or a manual dispatch with an
       # explicit version). Dev builds (0.0.0-dev.*) are never pushed.
+      - name: Validate publish configuration
+        if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.version != '')
+        shell: bash
+        env:
+          NUGET_USER: ${{ vars.NUGET_USER }}
+        run: |
+          if [ -z "${NUGET_USER}" ]; then
+            echo "::error::The repository variable 'NUGET_USER' is not set."
+            echo "Set it to your nuget.org profile name (the account that owns the trusted publishing policy)."
+            echo "See README.md > 'Trusted Publishing setup'."
+            exit 1
+          fi
+          echo "Publishing as nuget.org user: ${NUGET_USER}"
+
       - name: NuGet login (OIDC -> temporary API key)
         if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.version != '')
         id: nuget_login
         uses: NuGet/login@v1
         with:
           # The nuget.org profile name of the account that owns the trusted
-          # publishing policy. This is NOT a secret, but it is kept configurable.
+          # publishing policy. Configured via the `NUGET_USER` repository variable.
           user: ${{ vars.NUGET_USER }}
 
       - name: Publish to NuGet.org (Trusted Publishing)
