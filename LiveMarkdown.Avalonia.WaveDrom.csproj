@@ -6,10 +6,11 @@
     <Authors>DearVa</Authors>
     <Description>This is a extension package for LiveMarkdown.Avalonia that adds support for rendering WaveDrom timing diagrams.</Description>
     <PackageProjectUrl>https://github.com/DearVa/LiveMarkdown.Avalonia</PackageProjectUrl>
-    <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/DearVa/LiveMarkdown.Avalonia</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Version>0.1.0</Version>
     <PackageTags>markdown;avalonia;llm;wavedrom;timing-diagram</PackageTags>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -27,6 +28,6 @@
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
-    <None Include="..\..\img\icon.png" Pack="true" PackagePath="icon.png" />
+    <None Include="icon.png" Pack="true" PackagePath="icon.png" Condition="Exists('icon.png')" />
   </ItemGroup>
 </Project>

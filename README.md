@@ -180,6 +180,24 @@ repository for details).
 - Fill colors for skins other than default
 - Automated verification of on-screen rendering (pixels)
 
+## Release (GitHub Actions)
+
+Pushing a tag like `v0.1.0` triggers the
+[`Release` workflow](.github/workflows/release.yml), which:
+
+1. restores, builds and packs the project in `Release` configuration,
+2. uploads the generated `.nupkg` as a workflow artifact,
+3. publishes the package to NuGet.org (only if the `NUGET_API_KEY` secret is set),
+4. creates a GitHub Release with the `.nupkg` attached and auto-generated notes.
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The workflow can also be started manually from the **Actions** tab
+(`workflow_dispatch`) by supplying a version number.
+
 ## License
 
 Apache-2.0
