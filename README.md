@@ -2,10 +2,18 @@
 
 ![demo](./demo.png)
 
-An extension package for `LiveMarkdown.Avalonia` that natively renders
-[WaveDrom](https://wavedrom.com/) timing diagrams (digital waveform diagrams),
-written in Markdown code fences, as Avalonia controls **without a JavaScript
-runtime or WebView**.
+An extension package for
+[**LiveMarkdown.Avalonia**](https://github.com/DearVa/LiveMarkdown.Avalonia) that
+natively renders [WaveDrom](https://wavedrom.com/) timing diagrams (digital
+waveform diagrams), written in Markdown code fences, as Avalonia controls
+**without a JavaScript runtime or WebView**.
+
+> This package is an **extension of
+> [LiveMarkdown.Avalonia](https://github.com/DearVa/LiveMarkdown.Avalonia)**
+> (the Markdown renderer for [Avalonia](https://avaloniaui.net/)). It does not
+> work on its own — it plugs into `LiveMarkdown.Avalonia` to add ` ```wavedrom `
+> support. For the core Markdown rendering features, please refer to the
+> [LiveMarkdown.Avalonia repository](https://github.com/DearVa/LiveMarkdown.Avalonia).
 
 The official WaveDrom rendering logic (layout, brick skins, markers, arrows,
 etc.) has been ported to C# and is drawn directly via `DrawingContext`.
@@ -29,7 +37,8 @@ etc.) has been ported to C# and is drawn directly via `DrawingContext`.
 dotnet add package LiveMarkdown.Avalonia.WaveDrom
 ```
 
-The `LiveMarkdown.Avalonia` core package is required (this package depends on it).
+The [`LiveMarkdown.Avalonia`](https://github.com/DearVa/LiveMarkdown.Avalonia)
+core package is required (this package depends on it).
 
 ## Adding to LiveMarkdown
 
