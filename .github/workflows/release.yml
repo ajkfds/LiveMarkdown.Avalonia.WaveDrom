@@ -10,6 +10,10 @@ on:
         description: 'Version to build (e.g. 0.1.0). Defaults to the tag name without the leading "v".'
         required: false
         type: string
+      nuget_user:
+        description: 'nuget.org profile name that owns the Trusted Publishing policy. Defaults to the NUGET_USER variable, then the repository owner.'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -67,19 +71,26 @@ jobs:
 
       # Publish only for real releases (a tag push, or a manual dispatch with an
       # explicit version). Dev builds (0.0.0-dev.*) are never pushed.
-      - name: Validate publish configuration
+      - name: Resolve nuget.org user
+        id: nuget_user
         if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.version != '')
         shell: bash
         env:
-          NUGET_USER: ${{ vars.NUGET_USER }}
+          INPUT_USER: ${{ github.event.inputs.nuget_user }}
+          VAR_USER: ${{ vars.NUGET_USER }}
+          OWNER_USER: ${{ github.repository_owner }}
         run: |
-          if [ -z "${NUGET_USER}" ]; then
-            echo "::error::The repository variable 'NUGET_USER' is not set."
-            echo "Set it to your nuget.org profile name (the account that owns the trusted publishing policy)."
-            echo "See README.md > 'Trusted Publishing setup'."
-            exit 1
+          # Resolution order: workflow_dispatch input > NUGET_USER variable > repo owner.
+          if [ -n "${INPUT_USER}" ]; then
+            USER="${INPUT_USER}"
+          elif [ -n "${VAR_USER}" ]; then
+            USER="${VAR_USER}"
+          else
+            USER="${OWNER_USER}"
+            echo "::warning::Repository variable 'NUGET_USER' is not set; falling back to the repository owner '${USER}'. Set 'NUGET_USER' (Variables tab) to your nuget.org profile name if it differs, and make sure a matching Trusted Publishing policy exists on nuget.org."
           fi
-          echo "Publishing as nuget.org user: ${NUGET_USER}"
+          echo "user=${USER}" >> "$GITHUB_OUTPUT"
+          echo "Publishing as nuget.org user: ${USER}"
 
       - name: NuGet login (OIDC -> temporary API key)
         if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.version != '')
@@ -87,8 +98,9 @@ jobs:
         uses: NuGet/login@v1
         with:
           # The nuget.org profile name of the account that owns the trusted
-          # publishing policy. Configured via the `NUGET_USER` repository variable.
-          user: ${{ vars.NUGET_USER }}
+          # publishing policy. Resolved from the dispatch input / `NUGET_USER`
+          # repository variable, falling back to the repository owner.
+          user: ${{ steps.nuget_user.outputs.user }}
 
       - name: Publish to NuGet.org (Trusted Publishing)
         if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.version != '')
