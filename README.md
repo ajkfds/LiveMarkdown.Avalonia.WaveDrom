@@ -8,6 +8,8 @@ runtime or WebView**.
 The official WaveDrom rendering logic (layout, brick skins, markers, arrows,
 etc.) has been ported to C# and is drawn directly via `DrawingContext`.
 
+![demo](./demo.png)
+
 ## Features
 
 - 🔌 **Markdown integration** — Detects ` ```wavedrom ` fences and renders them as waveform diagrams.
