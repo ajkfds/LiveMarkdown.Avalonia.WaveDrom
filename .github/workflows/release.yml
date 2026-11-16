@@ -1,0 +1,116 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (e.g. 0.1.0). Defaults to the tag name without the leading "v".'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  # Required for NuGet Trusted Publishing (OIDC token exchange).
+  id-token: write
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  PROJECT: LiveMarkdown.Avalonia.WaveDrom.csproj
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="0.0.0-dev.${GITHUB_RUN_NUMBER}"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Resolved version: ${VERSION}"
+
+      - name: Restore
+        run: dotnet restore "${{ env.PROJECT }}"
+
+      - name: Build (Release)
+        run: dotnet build "${{ env.PROJECT }}" -c Release --no-restore -p:Version=${{ steps.version.outputs.version }}
+
+      - name: Pack (Release)
+        run: dotnet pack "${{ env.PROJECT }}" -c Release --no-build -p:Version=${{ steps.version.outputs.version }} -o ./artifacts
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nupkg
+          path: ./artifacts/*.nupkg
+          if-no-files-found: error
+
+      # Publish only for real releases (a tag push, or a manual dispatch with an
+      # explicit version). Dev builds (0.0.0-dev.*) are never pushed.
+      - name: Resolve nuget.org user
+        id: nuget_user
+        if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.version != '')
+        shell: bash
+        env:
+          # Accept NUGET_USER whether it was configured as a repository
+          # *variable* (vars.*) or a repository/environment *secret* (secrets.*).
+          VAR_USER: ${{ vars.NUGET_USER }}
+          SECRET_USER: ${{ secrets.NUGET_USER }}
+        run: |
+          USER="${VAR_USER:-${SECRET_USER}}"
+          if [ -z "${USER}" ]; then
+            echo "::error::Neither the 'NUGET_USER' variable nor secret is set."
+            echo "Add it under Settings > Secrets and variables > Actions (either the Variables or Secrets tab)."
+            echo "The value must be your nuget.org profile name that owns the Trusted Publishing policy."
+            echo "See README.md > 'Trusted Publishing setup'."
+            exit 1
+          fi
+          echo "user=${USER}" >> "$GITHUB_OUTPUT"
+          echo "Publishing as nuget.org user: ${USER}"
+
+      - name: NuGet login (OIDC -> temporary API key)
+        if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.version != '')
+        id: nuget_login
+        uses: NuGet/login@v1
+        with:
+          # The nuget.org profile name of the account that owns the trusted
+          # publishing policy. Read from the `NUGET_USER` variable or secret.
+          user: ${{ steps.nuget_user.outputs.user }}
+
+      - name: Publish to NuGet.org (Trusted Publishing)
+        if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.version != '')
+        shell: bash
+        run: |
+          dotnet nuget push ./artifacts/*.nupkg \
+            --api-key "${{ steps.nuget_login.outputs.NUGET_API_KEY }}" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: v${{ steps.version.outputs.version }}
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: ./artifacts/*.nupkg

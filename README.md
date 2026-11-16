@@ -1,9 +1,19 @@
 # LiveMarkdown.Avalonia.WaveDrom
 
-An extension package for `LiveMarkdown.Avalonia` that natively renders
-[WaveDrom](https://wavedrom.com/) timing diagrams (digital waveform diagrams),
-written in Markdown code fences, as Avalonia controls **without a JavaScript
-runtime or WebView**.
+![demo](./demo.png)
+
+An extension package for
+[**LiveMarkdown.Avalonia**](https://github.com/DearVa/LiveMarkdown.Avalonia) that
+natively renders [WaveDrom](https://wavedrom.com/) timing diagrams (digital
+waveform diagrams), written in Markdown code fences, as Avalonia controls
+**without a JavaScript runtime or WebView**.
+
+> This package is an **extension of
+> [LiveMarkdown.Avalonia](https://github.com/DearVa/LiveMarkdown.Avalonia)**
+> (the Markdown renderer for [Avalonia](https://avaloniaui.net/)). It does not
+> work on its own — it plugs into `LiveMarkdown.Avalonia` to add ` ```wavedrom `
+> support. For the core Markdown rendering features, please refer to the
+> [LiveMarkdown.Avalonia repository](https://github.com/DearVa/LiveMarkdown.Avalonia).
 
 The official WaveDrom rendering logic (layout, brick skins, markers, arrows,
 etc.) has been ported to C# and is drawn directly via `DrawingContext`.
@@ -27,7 +37,8 @@ etc.) has been ported to C# and is drawn directly via `DrawingContext`.
 dotnet add package LiveMarkdown.Avalonia.WaveDrom
 ```
 
-The `LiveMarkdown.Avalonia` core package is required (this package depends on it).
+The [`LiveMarkdown.Avalonia`](https://github.com/DearVa/LiveMarkdown.Avalonia)
+core package is required (this package depends on it).
 
 ## Adding to LiveMarkdown
 
@@ -168,6 +179,45 @@ repository for details).
 - `config.skin` (other skins such as narrow / dark; brick dimensions differ from default)
 - Fill colors for skins other than default
 - Automated verification of on-screen rendering (pixels)
+
+## Release (GitHub Actions)
+
+Pushing a tag like `v0.1.0` triggers the
+[`Release` workflow](.github/workflows/release.yml), which:
+
+1. restores, builds and packs the project in `Release` configuration,
+2. uploads the generated `.nupkg` as a workflow artifact,
+3. publishes the package to NuGet.org using
+   [NuGet Trusted Publishing](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing)
+   (an OIDC-exchanged, short-lived API key — no long-lived secret is stored),
+4. creates a GitHub Release with the `.nupkg` attached and auto-generated notes.
+
+> **Trusted Publishing setup**
+>
+> No long-lived `NUGET_API_KEY` is required. Instead, configure a trusted
+> publishing policy on nuget.org and expose your nuget.org profile name as
+> `NUGET_USER`:
+>
+> 1. On nuget.org, go to **Account settings → Trusted Publishing** and add a
+>    policy for this repository (owner/repo) and the workflow file
+>    `.github/workflows/release.yml`.
+> 2. In GitHub, add `NUGET_USER` under
+>    **Settings → Secrets and variables → Actions**, set to your nuget.org
+>    profile name. It may be added on either the **Variables** tab
+>    (`vars.NUGET_USER`) or the **Secrets** tab (`secrets.NUGET_USER`) — the
+>    workflow reads whichever is present (variable takes precedence).
+>
+> The publish step only runs for tag pushes (`v*`) or a manual dispatch with an
+> explicit version; `0.0.0-dev.*` builds are never pushed. If `NUGET_USER` is
+> missing, the workflow fails early with a clear message.
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The workflow can also be started manually from the **Actions** tab
+(`workflow_dispatch`) by supplying a version number.
 
 ## License
 
